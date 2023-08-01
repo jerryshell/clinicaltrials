@@ -19,14 +19,14 @@ def get_study_json_by_id(id: str):
     return study_json
 
 
-with open('CRPC.json') as f:
+with open('cond.Castration_Resistant_Prostate_Cancer.json') as f:
     crpc = json.load(f)
 # print(crpc)
 
 crpc_hits = crpc['hits']
 # print(crpc_hits)
 
-with open('other.CRPC.json') as f:
+with open('iterm.Castration_Resistant_Prostate_Cancer.json') as f:
     other_crpc = json.load(f)
 # print(other_crpc)
 
@@ -39,7 +39,22 @@ for item in crpc_hits:
     id = item['id']
     print(id)
 
+    study_json = get_study_json_by_id(id)
+    eligibility_module = study_json['study']['protocolSection']['eligibilityModule']
+    eligibility_criteria = eligibility_module['eligibilityCriteria']
+    # print(eligibility_criteria)
+
+    if str(eligibility_criteria).find('enzalutamide') == -1 and str(eligibility_criteria).find('abiraterone') == -1:
+        continue
+
     protocol_section = item['study']['protocolSection']
+
+    start_date = protocol_section['statusModule'].get(
+        'startDateStruct', {'date': '-'}
+    )['date']
+    completion_date = protocol_section['statusModule'].get(
+        'completionDateStruct', {'date': '-'}
+    )['date']
 
     sponsor = protocol_section['sponsorCollaboratorsModule']['leadSponsor']['name']
 
@@ -54,15 +69,21 @@ for item in crpc_hits:
                     drug_list.append(item['name'])
     drug_list_str = ','.join(drug_list)
 
-    study_json = get_study_json_by_id(id)
-    eligibility_module = study_json['study']['protocolSection']['eligibilityModule']
-    eligibility_criteria = eligibility_module['eligibilityCriteria']
-    # print(eligibility_criteria)
-
-    if str(eligibility_criteria).find('enzalutamide') != -1 or str(eligibility_criteria).find('abiraterone') != -1:
-        result_set.add((id, sponsor, drug_list_str))
+    result_set.add((
+        id,
+        sponsor,
+        start_date,
+        completion_date,
+        drug_list_str
+    ))
 
 with open('data.csv', 'w') as f:
     write = csv.writer(f)
-    write.writerow(['id', 'sponsor', 'drug'])
+    write.writerow([
+        'id',
+        'sponsor',
+        'start_date',
+        'completion_date',
+        'drug'
+    ])
     write.writerows(result_set)
