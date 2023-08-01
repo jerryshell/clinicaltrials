@@ -1,4 +1,4 @@
-# clinicaltrials CRPC
+# clinicaltrials
 
 `enzalutamide` OR `abiraterone`
 

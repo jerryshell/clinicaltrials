@@ -2,6 +2,7 @@ import json
 import csv
 import requests
 
+id_set = set()
 result_set = set()
 
 
@@ -20,27 +21,39 @@ def get_study_json_by_id(id: str):
 
 
 with open('cond.Castration_Resistant_Prostate_Cancer.json') as f:
-    crpc = json.load(f)
-# print(crpc)
+    study = json.load(f)
+# print(study)
 
-crpc_hits = crpc['hits']
-# print(crpc_hits)
+study_hits = study['hits']
+# print(study_hits)
 
-with open('iterm.Castration_Resistant_Prostate_Cancer.json') as f:
-    other_crpc = json.load(f)
-# print(other_crpc)
+with open('term.Castration_Resistant_Prostate_Cancer.json') as f:
+    other_study = json.load(f)
+# print(other_study)
 
-other_crpc_hits = other_crpc['hits']
-# print(other_crpc_hits)
+other_study_hits = other_study['hits']
+# print(other_study_hits)
 
-crpc_hits += other_crpc_hits
+study_hits += other_study_hits
 
-for item in crpc_hits:
+# i = 100
+for item in study_hits:
+    # i -= 1
+    # if i <= 0:
+    #     break
+
     id = item['id']
     print(id)
 
+    if id in id_set:
+        continue
+
+    id_set.add(id)
+
     study_json = get_study_json_by_id(id)
     eligibility_module = study_json['study']['protocolSection']['eligibilityModule']
+    if 'eligibilityCriteria' not in eligibility_module:
+        continue
     eligibility_criteria = eligibility_module['eligibilityCriteria']
     # print(eligibility_criteria)
 
