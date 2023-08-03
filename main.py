@@ -36,6 +36,8 @@ print('study_hits len:', len(study_hits))
 id_set = set()
 result_set = set()
 
+snapshot_init = 50
+snapshot_counter = snapshot_init
 for item in study_hits:
     add_to_result_set_flag = False
 
@@ -141,6 +143,12 @@ for item in study_hits:
             conditions,
             drug_list_str,
         ))
+        snapshot_counter -= 1
+        print('next snapshot:', snapshot_counter)
+        if snapshot_counter <= 0:
+            snapshot_counter = snapshot_init
+            print('snapshot to csv ...')
+            write_to_csv(result_set)
 
 print('write to csv ...')
 write_to_csv(result_set)
