@@ -58,6 +58,10 @@ for item in study_hits:
     # phase
     phase = protocol_section['designModule'].get('phases', ['-'])[0]
 
+    # conditions
+    conditions = protocol_section['conditionsModule'].get('conditions', ['-'])
+    conditions = ','.join(conditions)
+
     drug_list = []
     if 'armsInterventionsModule' in protocol_section:
         arms_interventions_module = protocol_section['armsInterventionsModule']
@@ -76,6 +80,7 @@ for item in study_hits:
     completion_date = '\t' + completion_date
     status = '\t' + status
     phase = '\t' + phase
+    conditions = '\t' + conditions
     drug_list_str = '\t' + drug_list_str
 
     result_set.add((
@@ -85,6 +90,7 @@ for item in study_hits:
         completion_date,
         status,
         phase,
+        conditions,
         drug_list_str,
     ))
 

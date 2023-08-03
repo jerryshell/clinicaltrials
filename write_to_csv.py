@@ -11,6 +11,7 @@ def write_to_csv(data):
             'completion_date',
             'status',
             'phase',
+            'conditions',
             'drug',
         ])
         write.writerows(data)
