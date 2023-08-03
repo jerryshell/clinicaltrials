@@ -1,12 +1,9 @@
-import json
-import csv
 from get_study_json_by_id import *
 from get_study_hits_by_query import *
 from write_to_csv import *
 
 id_set = set()
 result_set = set()
-
 
 query = input('Enter query\n>>> ')
 print('query:', query)
@@ -19,12 +16,7 @@ print('keywords:', keywords)
 
 study_hits = get_study_hits_by_query(query)
 
-# i = 100
 for item in study_hits:
-    # i -= 1
-    # if i <= 0:
-    #     break
-
     id = item['id']
     print(id)
 
