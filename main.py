@@ -95,11 +95,10 @@ for item in study_hits:
     conditions = protocol_section['conditionsModule'].get('conditions', ['-'])
     conditions = ','.join(conditions)
     if keywords_in_conditions:
-        for condition in conditions:
-            match_any_keywords = any(
-                [condition.find(keyword) != -1 for keyword in keywords]
-            )
-            add_to_result_set_flag = add_to_result_set_flag or match_any_keywords
+        match_any_keywords = any(
+            [conditions.find(keyword) != -1 for keyword in keywords]
+        )
+        add_to_result_set_flag = add_to_result_set_flag or match_any_keywords
 
     drug_list = []
     if 'armsInterventionsModule' in protocol_section:
