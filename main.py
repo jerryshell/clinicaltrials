@@ -31,6 +31,7 @@ print('keywords_in_conditions:', keywords_in_conditions)
 
 print('searching ...')
 study_hits = get_study_hits_by_query(query)
+print('study_hits len:', len(study_hits))
 
 id_set = set()
 result_set = set()
