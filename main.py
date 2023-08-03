@@ -1,40 +1,23 @@
 import json
 import csv
-import requests
+from get_study_json_by_id import *
+from get_study_hits_by_query import *
+from write_to_csv import *
 
 id_set = set()
 result_set = set()
 
 
-def get_study_json_by_id(id: str):
-    url = 'https://www.clinicaltrials.gov/api/int/studies/' + id
-    # print(url)
+query = input('Enter query\n>>> ')
+print('query:', query)
 
-    response = requests.get(url)
-    response_text = response.text
-    # print(response_text)
+keywords = input(
+    'Enter keywords, multiple keywords to use , split\n>>> '
+)
+keywords = keywords.split(',')
+print('keywords:', keywords)
 
-    study_json = json.loads(response_text)
-    # print(study_json)
-
-    return study_json
-
-
-with open('cond.Castration_Resistant_Prostate_Cancer.json') as f:
-    study = json.load(f)
-# print(study)
-
-study_hits = study['hits']
-# print(study_hits)
-
-with open('term.Castration_Resistant_Prostate_Cancer.json') as f:
-    other_study = json.load(f)
-# print(other_study)
-
-other_study_hits = other_study['hits']
-# print(other_study_hits)
-
-study_hits += other_study_hits
+study_hits = get_study_hits_by_query(query)
 
 # i = 100
 for item in study_hits:
@@ -54,10 +37,16 @@ for item in study_hits:
     eligibility_module = study_json['study']['protocolSection']['eligibilityModule']
     if 'eligibilityCriteria' not in eligibility_module:
         continue
-    eligibility_criteria = eligibility_module['eligibilityCriteria']
+    eligibility_criteria = str(eligibility_module['eligibilityCriteria'])
     # print(eligibility_criteria)
 
-    if str(eligibility_criteria).find('enzalutamide') == -1 and str(eligibility_criteria).find('abiraterone') == -1:
+    find_any_keywords = False
+    for keyword in keywords:
+        if eligibility_criteria.find(keyword) != -1:
+            find_any_keywords = True
+            break
+    if not find_any_keywords:
+        print('not find_any_keywords')
         continue
 
     protocol_section = item['study']['protocolSection']
@@ -82,6 +71,13 @@ for item in study_hits:
                     drug_list.append(item['name'])
     drug_list_str = ','.join(drug_list)
 
+    # add \t for stupid excel
+    id = '\t' + id
+    sponsor = '\t' + sponsor
+    start_date = '\t' + start_date
+    completion_date = '\t' + completion_date
+    drug_list_str = '\t' + drug_list_str
+
     result_set.add((
         id,
         sponsor,
@@ -90,13 +86,5 @@ for item in study_hits:
         drug_list_str
     ))
 
-with open('data.csv', 'w') as f:
-    write = csv.writer(f)
-    write.writerow([
-        'id',
-        'sponsor',
-        'start_date',
-        'completion_date',
-        'drug'
-    ])
-    write.writerows(result_set)
+print('write to csv ...')
+write_to_csv(result_set)
