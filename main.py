@@ -52,6 +52,12 @@ for item in study_hits:
 
     sponsor = protocol_section['sponsorCollaboratorsModule']['leadSponsor']['name']
 
+    # overallStatus
+    status = protocol_section['statusModule']['overallStatus']
+
+    # phase
+    phase = protocol_section['designModule'].get('phases', ['-'])[0]
+
     drug_list = []
     if 'armsInterventionsModule' in protocol_section:
         arms_interventions_module = protocol_section['armsInterventionsModule']
@@ -68,6 +74,8 @@ for item in study_hits:
     sponsor = '\t' + sponsor
     start_date = '\t' + start_date
     completion_date = '\t' + completion_date
+    status = '\t' + status
+    phase = '\t' + phase
     drug_list_str = '\t' + drug_list_str
 
     result_set.add((
@@ -75,7 +83,9 @@ for item in study_hits:
         sponsor,
         start_date,
         completion_date,
-        drug_list_str
+        status,
+        phase,
+        drug_list_str,
     ))
 
 print('write to csv ...')

@@ -9,6 +9,8 @@ def write_to_csv(data):
             'sponsor',
             'start_date',
             'completion_date',
-            'drug'
+            'status',
+            'phase',
+            'drug',
         ])
         write.writerows(data)
