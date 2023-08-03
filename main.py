@@ -47,7 +47,12 @@ for item in study_hits:
 
     id_set.add(id)
 
-    study_json = get_study_json_by_id(id)
+    try:
+        study_json = get_study_json_by_id(id)
+    except Exception as e:
+        print(e)
+        continue
+
     eligibility_module = study_json['study']['protocolSection']['eligibilityModule']
     if 'eligibilityCriteria' not in eligibility_module:
         continue
