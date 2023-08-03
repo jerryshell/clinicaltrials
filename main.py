@@ -2,13 +2,13 @@ from get_study_json_by_id import *
 from get_study_hits_by_query import *
 from write_to_csv import *
 
-query = input('---\nEnter query\n>>> ')
+query = input('---\nEnter query [e.g. CRPC]\n>>> ')
 print('query:', query)
 
 keywords = input(
-    '---\nEnter keywords, multiple keywords to use , split\n>>> '
+    '---\nEnter keywords, multiple keywords to use , split [e.g. enzalutamide,abiraterone]\n>>> '
 )
-keywords = keywords.split(',')
+keywords = keywords.lower().split(',')
 print('keywords:', keywords)
 
 keywords_in_inclusion = input(
@@ -50,7 +50,9 @@ for item in study_hits:
     eligibility_module = study_json['study']['protocolSection']['eligibilityModule']
     if 'eligibilityCriteria' not in eligibility_module:
         continue
-    eligibility_criteria = str(eligibility_module['eligibilityCriteria'])
+    eligibility_criteria = str(
+        eligibility_module['eligibilityCriteria']
+    ).lower()
 
     eligibility_criteria_split = eligibility_criteria.split(
         'Exclusion Criteria:'
