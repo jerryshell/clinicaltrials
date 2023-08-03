@@ -2,21 +2,42 @@ from get_study_json_by_id import *
 from get_study_hits_by_query import *
 from write_to_csv import *
 
-id_set = set()
-result_set = set()
-
-query = input('Enter query\n>>> ')
+query = input('---\nEnter query\n>>> ')
 print('query:', query)
 
 keywords = input(
-    'Enter keywords, multiple keywords to use , split\n>>> '
+    '---\nEnter keywords, multiple keywords to use , split\n>>> '
 )
 keywords = keywords.split(',')
 print('keywords:', keywords)
 
+keywords_in_inclusion = input(
+    '---\nkeywords in Inclusion Criteria? (yes/no)\n>>> '
+)
+keywords_in_inclusion = keywords_in_inclusion.lower() == 'yes'
+print('keywords_in_inclusion:', keywords_in_inclusion)
+
+keywords_in_exclusion = input(
+    '---\nkeywords in Exclusion Criteria? (yes/no)\n>>> '
+)
+keywords_in_exclusion = keywords_in_exclusion.lower() == 'yes'
+print('keywords_in_exclusion:', keywords_in_exclusion)
+
+keywords_in_conditions = input(
+    '---\nkeywords in Conditions? (yes/no)\n>>> '
+)
+keywords_in_conditions = keywords_in_conditions.lower() == 'yes'
+print('keywords_in_conditions:', keywords_in_conditions)
+
+print('searching ...')
 study_hits = get_study_hits_by_query(query)
 
+id_set = set()
+result_set = set()
+
 for item in study_hits:
+    add_to_result_set_flag = False
+
     id = item['id']
     print(id)
 
@@ -30,18 +51,30 @@ for item in study_hits:
     if 'eligibilityCriteria' not in eligibility_module:
         continue
     eligibility_criteria = str(eligibility_module['eligibilityCriteria'])
-    # print(eligibility_criteria)
 
-    find_any_keywords = False
-    for keyword in keywords:
-        if eligibility_criteria.find(keyword) != -1:
-            find_any_keywords = True
-            break
-    if not find_any_keywords:
-        print('not find_any_keywords')
-        continue
+    eligibility_criteria_split = eligibility_criteria.split(
+        'Exclusion Criteria:'
+    )
+    if len(eligibility_criteria_split) == 2:
+        inclusion_criteria = eligibility_criteria_split[0]
+        exclusion_criteria = eligibility_criteria_split[1]
+    else:
+        inclusion_criteria = eligibility_criteria
+        exclusion_criteria = ''
 
-    protocol_section = item['study']['protocolSection']
+    if keywords_in_inclusion:
+        match_any_keywords = any(
+            [inclusion_criteria.find(keyword) != -1 for keyword in keywords]
+        )
+        add_to_result_set_flag = add_to_result_set_flag or match_any_keywords
+
+    if keywords_in_exclusion:
+        match_any_keywords = any(
+            [exclusion_criteria.find(keyword) != -1 for keyword in keywords]
+        )
+        add_to_result_set_flag = add_to_result_set_flag or match_any_keywords
+
+    protocol_section = study_json['study']['protocolSection']
 
     start_date = protocol_section['statusModule'].get(
         'startDateStruct', {'date': '-'}
@@ -61,6 +94,12 @@ for item in study_hits:
     # conditions
     conditions = protocol_section['conditionsModule'].get('conditions', ['-'])
     conditions = ','.join(conditions)
+    if keywords_in_conditions:
+        for condition in conditions:
+            match_any_keywords = any(
+                [condition.find(keyword) != -1 for keyword in keywords]
+            )
+            add_to_result_set_flag = add_to_result_set_flag or match_any_keywords
 
     drug_list = []
     if 'armsInterventionsModule' in protocol_section:
@@ -83,16 +122,18 @@ for item in study_hits:
     conditions = '\t' + conditions
     drug_list_str = '\t' + drug_list_str
 
-    result_set.add((
-        id,
-        sponsor,
-        start_date,
-        completion_date,
-        status,
-        phase,
-        conditions,
-        drug_list_str,
-    ))
+    print('match: ', add_to_result_set_flag)
+    if add_to_result_set_flag:
+        result_set.add((
+            id,
+            sponsor,
+            start_date,
+            completion_date,
+            status,
+            phase,
+            conditions,
+            drug_list_str,
+        ))
 
 print('write to csv ...')
 write_to_csv(result_set)
